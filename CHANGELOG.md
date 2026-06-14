@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1 - 2026-06-14
+
+- Add integration artwork to the Home Assistant `brand` directory.
+- Report untrusted/self-signed SSL certificates separately from network errors.
+- Clarify that SSL verification should remain disabled for the factory Askey
+  certificate.
+
 ## 1.0.0 - 2026-06-14
 
 - Add config-flow setup and editable connection options.

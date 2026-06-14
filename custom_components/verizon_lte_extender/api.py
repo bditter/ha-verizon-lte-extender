@@ -37,6 +37,10 @@ class VerizonLteExtenderConnectionError(VerizonLteExtenderError):
     """The extender could not be reached."""
 
 
+class VerizonLteExtenderSslError(VerizonLteExtenderConnectionError):
+    """The extender certificate could not be verified."""
+
+
 class VerizonLteExtenderAuthError(VerizonLteExtenderError):
     """Authentication failed."""
 
@@ -196,6 +200,10 @@ class VerizonLteExtenderApi:
                 payload = await response.json(content_type=None)
         except VerizonLteExtenderAuthError:
             raise
+        except aiohttp.ClientConnectorCertificateError as err:
+            raise VerizonLteExtenderSslError(
+                "Unable to verify the extender SSL certificate"
+            ) from err
         except (TimeoutError, aiohttp.ClientError) as err:
             raise VerizonLteExtenderConnectionError(
                 f"Unable to communicate with {urlparse(self.base_url).netloc}"

@@ -15,6 +15,7 @@ from .api import (
     VerizonLteExtenderAuthError,
     VerizonLteExtenderConnectionError,
     VerizonLteExtenderError,
+    VerizonLteExtenderSslError,
     normalize_base_url,
 )
 from .const import (
@@ -87,6 +88,8 @@ class VerizonLteExtenderConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors["base"] = "invalid_host"
             except VerizonLteExtenderAuthError:
                 errors["base"] = "invalid_auth"
+            except VerizonLteExtenderSslError:
+                errors["base"] = "ssl_error"
             except VerizonLteExtenderConnectionError:
                 errors["base"] = "cannot_connect"
             except VerizonLteExtenderError:
@@ -131,6 +134,8 @@ class VerizonLteExtenderOptionsFlow(OptionsFlow):
                 errors["base"] = "invalid_host"
             except VerizonLteExtenderAuthError:
                 errors["base"] = "invalid_auth"
+            except VerizonLteExtenderSslError:
+                errors["base"] = "ssl_error"
             except VerizonLteExtenderConnectionError:
                 errors["base"] = "cannot_connect"
             except VerizonLteExtenderError:

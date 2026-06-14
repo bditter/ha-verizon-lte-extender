@@ -50,6 +50,11 @@ Configure:
 
 These settings can be changed later from the integration's **Configure** menu.
 
+The factory Askey certificate is self-signed and may also use
+`enodeb.askey-cons4g.vzwfemto.com` instead of the hostname entered in Home
+Assistant. Leave **Verify SSL certificate** off unless the extender is behind a
+trusted TLS proxy with a certificate matching the configured hostname.
+
 ## Authentication
 
 Firmware `v3.6.0408` hashes the admin password with SHA-256 and sends it with an
