@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+import socket
 import time
 from collections.abc import Mapping
 from typing import Any
@@ -39,6 +40,18 @@ class VerizonLteExtenderConnectionError(VerizonLteExtenderError):
 
 class VerizonLteExtenderSslError(VerizonLteExtenderConnectionError):
     """The extender certificate could not be verified."""
+
+
+class VerizonLteExtenderTimeoutError(VerizonLteExtenderConnectionError):
+    """The extender did not respond before the timeout."""
+
+
+class VerizonLteExtenderDnsError(VerizonLteExtenderConnectionError):
+    """The extender hostname could not be resolved."""
+
+
+class VerizonLteExtenderNetworkError(VerizonLteExtenderConnectionError):
+    """The TCP connection to the extender failed."""
 
 
 class VerizonLteExtenderAuthError(VerizonLteExtenderError):
@@ -204,7 +217,19 @@ class VerizonLteExtenderApi:
             raise VerizonLteExtenderSslError(
                 "Unable to verify the extender SSL certificate"
             ) from err
-        except (TimeoutError, aiohttp.ClientError) as err:
+        except TimeoutError as err:
+            raise VerizonLteExtenderTimeoutError(
+                f"Timed out connecting to {urlparse(self.base_url).netloc}"
+            ) from err
+        except aiohttp.ClientConnectorError as err:
+            if isinstance(err.os_error, socket.gaierror):
+                raise VerizonLteExtenderDnsError(
+                    f"Unable to resolve {urlparse(self.base_url).hostname}"
+                ) from err
+            raise VerizonLteExtenderNetworkError(
+                f"Unable to open a connection to {urlparse(self.base_url).netloc}"
+            ) from err
+        except aiohttp.ClientError as err:
             raise VerizonLteExtenderConnectionError(
                 f"Unable to communicate with {urlparse(self.base_url).netloc}"
             ) from err

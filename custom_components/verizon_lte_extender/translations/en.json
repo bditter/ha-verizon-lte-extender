@@ -21,9 +21,12 @@
     },
     "error": {
       "cannot_connect": "Unable to connect to the extender.",
+      "dns_error": "Home Assistant could not resolve the extender hostname. Try its IP address instead.",
       "invalid_auth": "Invalid admin password or the extender rejected the login.",
       "invalid_host": "Enter a valid HTTP or HTTPS address.",
+      "network_error": "Home Assistant could not open a TCP connection to the extender. Check routing and firewall rules from the Home Assistant host or container.",
       "ssl_error": "The extender certificate could not be verified. Turn off Verify SSL certificate for the factory self-signed Askey certificate.",
+      "timeout": "The connection timed out. Verify that Home Assistant itself can reach the extender address and port across the subnets.",
       "unknown": "Unexpected error communicating with the extender."
     },
     "abort": {
@@ -51,9 +54,12 @@
     },
     "error": {
       "cannot_connect": "Unable to connect to the extender.",
+      "dns_error": "Home Assistant could not resolve the extender hostname. Try its IP address instead.",
       "invalid_auth": "Invalid admin password or the extender rejected the login.",
       "invalid_host": "Enter a valid HTTP or HTTPS address.",
+      "network_error": "Home Assistant could not open a TCP connection to the extender. Check routing and firewall rules from the Home Assistant host or container.",
       "ssl_error": "The extender certificate could not be verified. Turn off Verify SSL certificate for the factory self-signed Askey certificate.",
+      "timeout": "The connection timed out. Verify that Home Assistant itself can reach the extender address and port across the subnets.",
       "unknown": "Unexpected error communicating with the extender."
     }
   },

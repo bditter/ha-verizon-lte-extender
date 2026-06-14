@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2 - 2026-06-14
+
+- Distinguish connection timeouts, DNS failures, and TCP connection failures
+  during setup.
+- Add routing-focused setup guidance for Home Assistant hosts on another
+  subnet.
+
 ## 1.0.1 - 2026-06-14
 
 - Add integration artwork to the Home Assistant `brand` directory.
