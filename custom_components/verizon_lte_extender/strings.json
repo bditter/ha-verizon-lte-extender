@@ -1,0 +1,85 @@
+{
+  "title": "Verizon LTE Extender",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Verizon LTE Extender",
+        "description": "Enter the extender address and its local admin password. The integration logs in directly and manages session tokens automatically.",
+        "data": {
+          "host": "Host or base URL",
+          "password": "Admin password",
+          "verify_ssl": "Verify SSL certificate",
+          "scan_interval": "Scan interval (seconds)"
+        },
+        "data_description": {
+          "host": "For example, https://192.168.1.20 or https://extender.example.net",
+          "password": "The password used to sign in to the extender web interface.",
+          "verify_ssl": "Enable only when the extender uses a trusted certificate.",
+          "scan_interval": "How often Home Assistant polls the extender. Minimum: 15 seconds."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to the extender.",
+      "invalid_auth": "Invalid admin password or the extender rejected the login.",
+      "invalid_host": "Enter a valid HTTP or HTTPS address.",
+      "unknown": "Unexpected error communicating with the extender."
+    },
+    "abort": {
+      "already_configured": "This extender is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Verizon LTE Extender options",
+        "description": "Update the extender connection and polling settings.",
+        "data": {
+          "host": "Host or base URL",
+          "password": "Admin password",
+          "verify_ssl": "Verify SSL certificate",
+          "scan_interval": "Scan interval (seconds)"
+        },
+        "data_description": {
+          "host": "For example, https://192.168.1.20 or https://extender.example.net",
+          "password": "The password used to sign in to the extender web interface.",
+          "verify_ssl": "Enable only when the extender uses a trusted certificate.",
+          "scan_interval": "How often Home Assistant polls the extender. Minimum: 15 seconds."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to the extender.",
+      "invalid_auth": "Invalid admin password or the extender rejected the login.",
+      "invalid_host": "Enter a valid HTTP or HTTPS address.",
+      "unknown": "Unexpected error communicating with the extender."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "gps_status": {"name": "GPS status"},
+      "active_users": {"name": "Active users"},
+      "total_active_users": {"name": "Total active users"},
+      "operation_mode": {"name": "Operation mode"},
+      "uptime": {"name": "Uptime"},
+      "backhaul_ipv4": {"name": "Backhaul IPv4"},
+      "backhaul_ipv6": {"name": "Backhaul IPv6"},
+      "software_version": {"name": "Software version"},
+      "cell_type": {"name": "Cell type"},
+      "four_g_signal": {"name": "4G signal"},
+      "gps_signal": {"name": "GPS signal"},
+      "ip_mode": {"name": "IP mode"},
+      "ipsec_ip": {"name": "IPsec IP"},
+      "pa_temperature": {"name": "PA temperature"},
+      "hnb_name": {"name": "HNB name"},
+      "csg_id": {"name": "CSG ID"},
+      "serial": {"name": "Serial"},
+      "mac_address": {"name": "MAC address"}
+    },
+    "binary_sensor": {
+      "online": {"name": "Online"},
+      "gps_acquired": {"name": "GPS acquired"},
+      "in_service": {"name": "In service"}
+    }
+  }
+}
