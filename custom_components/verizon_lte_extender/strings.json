@@ -85,7 +85,7 @@
     "binary_sensor": {
       "online": {"name": "Online"},
       "gps_acquired": {"name": "GPS acquired"},
-      "in_service": {"name": "In service"}
+      "in_service": {"name": "Operational status"}
     }
   }
 }

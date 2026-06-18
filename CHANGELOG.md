@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.10 - 2026-06-18
+
+- Rename the In Service binary sensor to Operational Status to match the
+  extender web interface.
+
 ## 1.0.9 - 2026-06-18
 
 - Keep the GPS Signal entity name and use the concise values `Acquired` and
