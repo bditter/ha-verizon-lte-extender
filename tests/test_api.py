@@ -184,6 +184,6 @@ class ApiTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(entity_values.four_g_signal_value(1), "In service")
         self.assertEqual(entity_values.four_g_signal_value(-1), "Not in service")
         self.assertEqual(entity_values.cell_type_value(2), "Members have priority")
-        self.assertEqual(entity_values.gps_signal_value(0), "Location not acquired")
-        self.assertEqual(entity_values.gps_signal_value(1), "Location acquired")
+        self.assertEqual(entity_values.gps_signal_value(0), "Not acquired")
+        self.assertEqual(entity_values.gps_signal_value(1), "Acquired")
         self.assertEqual(entity_values.ip_mode_value("0"), "IPv4 only")

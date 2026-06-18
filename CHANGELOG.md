@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.9 - 2026-06-18
+
+- Keep the GPS Signal entity name and use the concise values `Acquired` and
+  `Not acquired`.
+
 ## 1.0.8 - 2026-06-18
 
 - Restore the GPS Signal entity name.

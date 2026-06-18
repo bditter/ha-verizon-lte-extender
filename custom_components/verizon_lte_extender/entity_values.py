@@ -11,8 +11,8 @@ CELL_TYPE_VALUES = {
 }
 
 GPS_SIGNAL_VALUES = {
-    0: "Location not acquired",
-    1: "Location acquired",
+    0: "Not acquired",
+    1: "Acquired",
     2: "Time and location acquired from time server",
     3: "Time acquired; acquiring location",
     4: "Location acquired; acquiring time",
