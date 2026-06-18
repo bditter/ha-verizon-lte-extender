@@ -45,11 +45,18 @@ normalize_base_url = api_module.normalize_base_url
 @asynccontextmanager
 async def extender_server(
     expired_response: dict | None = None,
+    reject_stale_login_cookie: bool = False,
 ) -> AsyncIterator[tuple[str, dict[str, int]]]:
     """Run a minimal extender API server."""
     state = {"logins": 0, "status_requests": 0}
 
     async def login(request: web.Request) -> web.Response:
+        if (
+            reject_stale_login_cookie
+            and state["logins"]
+            and "Authtoken" in request.cookies
+        ):
+            return web.json_response({"result": 0, "message": "Session invalid"})
         data = parse_qs(await request.text())
         assert request.content_type == "application/json"
         assert len(data["password"][0]) == 64
@@ -132,7 +139,10 @@ class ApiTests(unittest.IsolatedAsyncioTestCase):
             "operationMode": "Will display the data after login",
             "SWver": "Will display the data after login",
         }
-        async with extender_server(redacted) as (host, state):
+        async with extender_server(redacted, reject_stale_login_cookie=True) as (
+            host,
+            state,
+        ):
             api = VerizonLteExtenderApi(host, "secret", verify_ssl=False)
             try:
                 status = await api.async_get_status()

@@ -132,6 +132,8 @@ class VerizonLteExtenderApi:
         async with self._auth_lock:
             if not force and self._has_session_token():
                 return
+            if force:
+                self._clear_session_cookies()
 
             password_hash = hashlib.sha256(self._password.encode()).hexdigest()
             expires = int((time.time() + (30 * 24 * 60 * 60)) * 1000)
@@ -254,6 +256,13 @@ class VerizonLteExtenderApi:
             )
             self._owns_session = True
         return self._session
+
+    def _clear_session_cookies(self) -> None:
+        """Discard stale authentication state before a forced login."""
+        if self._session is not None:
+            # This client owns a private session in production, so no unrelated
+            # integration cookies can be removed here.
+            self._session.cookie_jar.clear()
 
     def _cookies(self) -> Mapping[str, Any]:
         """Return cookies scoped to this extender."""

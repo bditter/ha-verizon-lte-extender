@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.5 - 2026-06-18
+
+- Clear expired authentication cookies before a forced session refresh.
+- Prevent stale `Authtoken` and XSRF cookies from causing `Session invalid`
+  during automatic re-login.
+
 ## 1.0.4 - 2026-06-18
 
 - Replace raw 4G signal, cell type, GPS signal, and IP mode numbers with
