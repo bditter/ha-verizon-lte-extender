@@ -75,7 +75,7 @@
       "software_version": {"name": "Software version"},
       "cell_type": {"name": "Cell type"},
       "four_g_signal": {"name": "4G signal"},
-      "gps_signal": {"name": "GPS acquisition"},
+      "gps_signal": {"name": "GPS signal"},
       "ip_mode": {"name": "IP mode"},
       "hnb_name": {"name": "HNB name"},
       "csg_id": {"name": "CSG ID"},

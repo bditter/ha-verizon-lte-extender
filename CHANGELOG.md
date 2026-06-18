@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.8 - 2026-06-18
+
+- Restore the GPS Signal entity name.
+- Display its normal values as `Location acquired` or
+  `Location not acquired`.
+
 ## 1.0.7 - 2026-06-18
 
 - Rename GPS Signal to GPS Acquisition.
