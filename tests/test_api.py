@@ -36,6 +36,7 @@ def load_module(name: str):
 
 load_module("const")
 api_module = load_module("api")
+entity_values = load_module("entity_values")
 VerizonLteExtenderApi = api_module.VerizonLteExtenderApi
 clean_value = api_module.clean_value
 normalize_base_url = api_module.normalize_base_url
@@ -152,3 +153,11 @@ class ApiTests(unittest.IsolatedAsyncioTestCase):
             clean_value("GA5.19<br>V0.5.019.2041"),
             "GA5.19 V0.5.019.2041",
         )
+
+    def test_numeric_entity_values_are_readable(self) -> None:
+        """Firmware numeric states are translated to UI labels."""
+        self.assertEqual(entity_values.four_g_signal_value(1), "In service")
+        self.assertEqual(entity_values.four_g_signal_value(-1), "Not in service")
+        self.assertEqual(entity_values.cell_type_value(2), "Members have priority")
+        self.assertEqual(entity_values.gps_signal_value(1), "Location acquired")
+        self.assertEqual(entity_values.ip_mode_value("0"), "IPv4 only")

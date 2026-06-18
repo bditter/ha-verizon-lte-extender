@@ -10,12 +10,21 @@ from homeassistant.components.sensor import SensorEntity, SensorEntityDescriptio
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .api import clean_value
 from .const import DOMAIN
 from .coordinator import VerizonLteExtenderCoordinator
 from .entity import VerizonLteExtenderEntity
+from .entity_values import (
+    cell_type_value,
+    four_g_signal_value,
+    gps_signal_value,
+    ip_mode_value,
+)
+
+REMOVED_SENSOR_KEYS = ("ipsecIp", "paTemp")
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -73,34 +82,26 @@ SENSORS: tuple[VerizonSensorDescription, ...] = (
         key="cellType",
         translation_key="cell_type",
         icon="mdi:account-group-outline",
+        value_fn=cell_type_value,
     ),
     VerizonSensorDescription(
         key="FourGsignal",
         translation_key="four_g_signal",
         icon="mdi:signal-4g",
+        value_fn=four_g_signal_value,
     ),
     VerizonSensorDescription(
         key="gpsSignal",
         translation_key="gps_signal",
         icon="mdi:satellite-variant",
+        value_fn=gps_signal_value,
     ),
     VerizonSensorDescription(
         key="ipMode",
         translation_key="ip_mode",
         icon="mdi:network-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
-    ),
-    VerizonSensorDescription(
-        key="ipsecIp",
-        translation_key="ipsec_ip",
-        icon="mdi:shield-lock-outline",
-        entity_category=EntityCategory.DIAGNOSTIC,
-    ),
-    VerizonSensorDescription(
-        key="paTemp",
-        translation_key="pa_temperature",
-        icon="mdi:thermometer",
-        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=ip_mode_value,
     ),
     VerizonSensorDescription(
         key="hnbName",
@@ -140,6 +141,14 @@ async def async_setup_entry(
 ) -> None:
     """Set up extender sensors."""
     coordinator: VerizonLteExtenderCoordinator = hass.data[DOMAIN][entry.entry_id]
+    registry = er.async_get(hass)
+    for key in REMOVED_SENSOR_KEYS:
+        entity_id = registry.async_get_entity_id(
+            "sensor", DOMAIN, f"{entry.entry_id}_{key}"
+        )
+        if entity_id:
+            registry.async_remove(entity_id)
+
     async_add_entities(
         VerizonLteExtenderSensor(coordinator, entry, description)
         for description in SENSORS

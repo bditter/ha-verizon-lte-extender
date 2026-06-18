@@ -76,8 +76,7 @@ The integration provides:
 - Backhaul IPv4 and IPv6 addresses
 - Software version
 - Cell type, 4G signal, and GPS signal
-- IP mode and IPsec IP
-- PA temperature when reported
+- IP mode
 - Online, GPS acquired, and in-service binary sensors
 
 HNB name, CSG ID, serial number, and MAC address are diagnostic entities that

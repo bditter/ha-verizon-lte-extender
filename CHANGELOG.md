@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.4 - 2026-06-18
+
+- Replace raw 4G signal, cell type, GPS signal, and IP mode numbers with
+  firmware-defined readable states.
+- Remove the IPsec IP and PA temperature entities, including existing entity
+  registry entries created by earlier releases.
+
 ## 1.0.3 - 2026-06-18
 
 - Detect the firmware's authenticated-data placeholder response as an expired
