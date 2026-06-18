@@ -84,6 +84,8 @@ async def extender_server(
                 "gpsStatus": "Location Acquired",
                 "FourGsignal": 1,
                 "SWver": "GA5.19<br>V0.5.019.2041",
+                # The real firmware leaves MDN redacted after a valid login.
+                "mdn": "Will display the data after login",
             }
         )
 
@@ -131,6 +133,19 @@ class ApiTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(info["feature"]["base"]["md"], "4116G")
         self.assertEqual(state["logins"], 2)
         self.assertEqual(state["status_requests"], 2)
+
+    def test_mdn_redaction_is_not_an_auth_failure(self) -> None:
+        """MDN remains redacted even in valid authenticated responses."""
+        self.assertFalse(
+            VerizonLteExtenderApi._is_auth_failure(
+                {
+                    "result": 1,
+                    "operationMode": "Hybrid",
+                    "SWver": "GA5.19<br>V0.5.019.2041",
+                    "mdn": "Will display the data after login",
+                }
+            )
+        )
 
     async def test_redacted_status_refreshes_authentication(self) -> None:
         """Protected placeholder values also trigger a fresh login."""

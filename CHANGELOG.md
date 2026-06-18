@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.6 - 2026-06-18
+
+- Do not treat the always-redacted MDN field as an expired session.
+- Limit redacted-session detection to status fields that are populated after a
+  successful login, fixing immediate `Session invalid` failures introduced in
+  1.0.3.
+
 ## 1.0.5 - 2026-06-18
 
 - Clear expired authentication cookies before a forced session refresh.

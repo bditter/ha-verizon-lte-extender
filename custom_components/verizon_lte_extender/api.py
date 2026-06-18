@@ -29,6 +29,13 @@ _AUTH_ERROR_MARKERS = (
     "forbidden",
 )
 _AUTH_REDACTED_VALUE = "will display the data after login"
+_AUTH_REQUIRED_STATUS_FIELDS = (
+    "operationMode",
+    "bhIpv4Addr",
+    "macAddress",
+    "SWver",
+    "serial",
+)
 
 
 class VerizonLteExtenderError(Exception):
@@ -284,8 +291,9 @@ class VerizonLteExtenderApi:
     def _is_auth_failure(data: Mapping[str, Any]) -> bool:
         """Recognize the firmware's HTTP-200 authentication errors."""
         if any(
-            isinstance(value, str) and value.strip().lower() == _AUTH_REDACTED_VALUE
-            for value in data.values()
+            isinstance(data.get(key), str)
+            and data[key].strip().lower() == _AUTH_REDACTED_VALUE
+            for key in _AUTH_REQUIRED_STATUS_FIELDS
         ):
             return True
         if data.get("result") in {401, 403}:
