@@ -11,6 +11,7 @@ from homeassistant.components.binary_sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN
@@ -34,11 +35,6 @@ BINARY_SENSORS: tuple[VerizonBinarySensorDescription, ...] = (
         translation_key="gps_acquired",
         icon="mdi:crosshairs-gps",
     ),
-    VerizonBinarySensorDescription(
-        key="in_service",
-        translation_key="in_service",
-        icon="mdi:signal-4g",
-    ),
 )
 
 
@@ -49,6 +45,13 @@ async def async_setup_entry(
 ) -> None:
     """Set up extender binary sensors."""
     coordinator: VerizonLteExtenderCoordinator = hass.data[DOMAIN][entry.entry_id]
+    registry = er.async_get(hass)
+    entity_id = registry.async_get_entity_id(
+        "binary_sensor", DOMAIN, f"{entry.entry_id}_in_service"
+    )
+    if entity_id:
+        registry.async_remove(entity_id)
+
     async_add_entities(
         VerizonLteExtenderBinarySensor(coordinator, entry, description)
         for description in BINARY_SENSORS
@@ -86,4 +89,4 @@ class VerizonLteExtenderBinarySensor(VerizonLteExtenderEntity, BinarySensorEntit
             return self.coordinator.last_update_success and result_ok
         if self.entity_description.key == "gps_acquired":
             return data.get("gpsStatus") == "Location Acquired"
-        return result_ok and data.get("FourGsignal") == 1
+        return False

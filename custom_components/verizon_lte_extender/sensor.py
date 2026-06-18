@@ -31,6 +31,7 @@ REMOVED_SENSOR_KEYS = ("ipsecIp", "paTemp")
 class VerizonSensorDescription(SensorEntityDescription):
     """Describe a Verizon LTE Extender sensor."""
 
+    data_key: str | None = None
     value_fn: Callable[[Any], Any] = clean_value
 
 
@@ -88,6 +89,13 @@ SENSORS: tuple[VerizonSensorDescription, ...] = (
         key="FourGsignal",
         translation_key="four_g_signal",
         icon="mdi:signal-4g",
+        value_fn=four_g_signal_value,
+    ),
+    VerizonSensorDescription(
+        key="operationalStatus",
+        data_key="FourGsignal",
+        translation_key="operational_status",
+        icon="mdi:access-point-check",
         value_fn=four_g_signal_value,
     ),
     VerizonSensorDescription(
@@ -173,7 +181,8 @@ class VerizonLteExtenderSensor(VerizonLteExtenderEntity, SensorEntity):
     @property
     def native_value(self) -> Any:
         """Return the current value."""
-        value = self.coordinator.data.get(self.entity_description.key)
+        data_key = self.entity_description.data_key or self.entity_description.key
+        value = self.coordinator.data.get(data_key)
         if value in {None, "", "-"}:
             return None
         return self.entity_description.value_fn(value)

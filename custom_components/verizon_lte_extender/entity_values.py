@@ -38,7 +38,7 @@ def _as_int(value: Any) -> int | None:
 
 def four_g_signal_value(value: Any) -> str:
     """Translate the extender's service flag."""
-    return "In service" if _as_int(value) == 1 else "Not in service"
+    return "In Service" if _as_int(value) == 1 else "Not In Service"
 
 
 def cell_type_value(value: Any) -> str:

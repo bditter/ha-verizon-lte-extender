@@ -181,8 +181,8 @@ class ApiTests(unittest.IsolatedAsyncioTestCase):
 
     def test_numeric_entity_values_are_readable(self) -> None:
         """Firmware numeric states are translated to UI labels."""
-        self.assertEqual(entity_values.four_g_signal_value(1), "In service")
-        self.assertEqual(entity_values.four_g_signal_value(-1), "Not in service")
+        self.assertEqual(entity_values.four_g_signal_value(1), "In Service")
+        self.assertEqual(entity_values.four_g_signal_value(-1), "Not In Service")
         self.assertEqual(entity_values.cell_type_value(2), "Members have priority")
         self.assertEqual(entity_values.gps_signal_value(0), "Not acquired")
         self.assertEqual(entity_values.gps_signal_value(1), "Acquired")

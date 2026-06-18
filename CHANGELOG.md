@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.11 - 2026-06-18
+
+- Replace the Operational Status binary sensor with a text sensor so its state
+  displays as `In Service` or `Not In Service` instead of `On` or `Off`.
+- Remove the former binary sensor entity from the entity registry.
+
 ## 1.0.10 - 2026-06-18
 
 - Rename the In Service binary sensor to Operational Status to match the
