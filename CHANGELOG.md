@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.3 - 2026-06-18
+
+- Detect the firmware's authenticated-data placeholder response as an expired
+  session.
+- Re-authenticate and retry once when protected status fields are returned as
+  `Will display the data after login` despite `result: 1`.
+
 ## 1.0.2 - 2026-06-14
 
 - Distinguish connection timeouts, DNS failures, and TCP connection failures

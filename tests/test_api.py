@@ -42,7 +42,9 @@ normalize_base_url = api_module.normalize_base_url
 
 
 @asynccontextmanager
-async def extender_server() -> AsyncIterator[tuple[str, dict[str, int]]]:
+async def extender_server(
+    expired_response: dict | None = None,
+) -> AsyncIterator[tuple[str, dict[str, int]]]:
     """Run a minimal extender API server."""
     state = {"logins": 0, "status_requests": 0}
 
@@ -65,7 +67,8 @@ async def extender_server() -> AsyncIterator[tuple[str, dict[str, int]]]:
         assert request.headers["X-XSRF-TOKEN"] == expected
         if state["status_requests"] == 1:
             return web.json_response(
-                {"result": 0, "message": "Sign in session is expired"}
+                expired_response
+                or {"result": 0, "message": "Sign in session is expired"}
             )
         return web.json_response(
             {
@@ -118,6 +121,24 @@ class ApiTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(status["result"], 1)
         self.assertEqual(info["feature"]["base"]["md"], "4116G")
+        self.assertEqual(state["logins"], 2)
+        self.assertEqual(state["status_requests"], 2)
+
+    async def test_redacted_status_refreshes_authentication(self) -> None:
+        """Protected placeholder values also trigger a fresh login."""
+        redacted = {
+            "result": 1,
+            "operationMode": "Will display the data after login",
+            "SWver": "Will display the data after login",
+        }
+        async with extender_server(redacted) as (host, state):
+            api = VerizonLteExtenderApi(host, "secret", verify_ssl=False)
+            try:
+                status = await api.async_get_status()
+            finally:
+                await api.async_close()
+
+        self.assertEqual(status["gpsStatus"], "Location Acquired")
         self.assertEqual(state["logins"], 2)
         self.assertEqual(state["status_requests"], 2)
 
