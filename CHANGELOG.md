@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.7 - 2026-06-18
+
+- Rename GPS Signal to GPS Acquisition.
+- Display normal GPS states as `Acquired` or `Not acquired` instead of raw or
+  overly technical values.
+
 ## 1.0.6 - 2026-06-18
 
 - Do not treat the always-redacted MDN field as an expired session.
