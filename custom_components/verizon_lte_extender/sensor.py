@@ -24,7 +24,7 @@ from .entity_values import (
     ip_mode_value,
 )
 
-REMOVED_SENSOR_KEYS = ("ipsecIp", "paTemp")
+REMOVED_SENSOR_KEYS = ("ipsecIp", "paTemp", "FourGsignal")
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -84,12 +84,6 @@ SENSORS: tuple[VerizonSensorDescription, ...] = (
         translation_key="cell_type",
         icon="mdi:account-group-outline",
         value_fn=cell_type_value,
-    ),
-    VerizonSensorDescription(
-        key="FourGsignal",
-        translation_key="four_g_signal",
-        icon="mdi:signal-4g",
-        value_fn=four_g_signal_value,
     ),
     VerizonSensorDescription(
         key="operationalStatus",

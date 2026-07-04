@@ -75,9 +75,9 @@ The integration provides:
 - Operation mode and uptime
 - Backhaul IPv4 and IPv6 addresses
 - Software version
-- Cell type, 4G signal, and GPS signal
+- Cell type, operational status, and GPS signal
 - IP mode
-- Online, GPS acquired, and in-service binary sensors
+- Online and GPS acquired binary sensors
 
 HNB name, CSG ID, serial number, and MAC address are diagnostic entities that
 are disabled by default. Latitude and longitude are not exposed.

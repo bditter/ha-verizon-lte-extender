@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.12 - 2026-07-04
+
+- Remove the duplicate 4G Signal sensor because the extender's `FourGsignal`
+  field is already represented as Operational Status.
+- Remove the old 4G Signal entity from the entity registry on setup.
+
 ## 1.0.11 - 2026-06-18
 
 - Replace the Operational Status binary sensor with a text sensor so its state

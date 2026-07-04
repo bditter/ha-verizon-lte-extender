@@ -74,7 +74,6 @@
       "backhaul_ipv6": {"name": "Backhaul IPv6"},
       "software_version": {"name": "Software version"},
       "cell_type": {"name": "Cell type"},
-      "four_g_signal": {"name": "4G signal"},
       "operational_status": {"name": "Operational status"},
       "gps_signal": {"name": "GPS signal"},
       "ip_mode": {"name": "IP mode"},
