@@ -76,7 +76,7 @@ The integration provides:
 - Backhaul IPv4 and IPv6 addresses
 - Software version
 - Cell type, operational status, and GPS signal
-- GPS amount
+- GPS locked satellites and GPS total satellites
 - Peak connected users and peak capacity used
 - Current uplink and downlink bandwidth
 - IP mode

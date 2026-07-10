@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0-beta.3 - 2026-07-10
+
+- Rename GPS amount entities to GPS locked satellites and GPS total satellites.
+- Fix current uplink/downlink bandwidth entities showing unavailable when the
+  performance endpoint returns a list of samples.
+
 ## 1.1.0-beta.2 - 2026-07-10
 
 - Add beta sensors from verified `/webapi/gps`, `/webapi/devices`, and

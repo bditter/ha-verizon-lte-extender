@@ -35,6 +35,8 @@ REMOVED_SENSOR_KEYS = (
     "beta_gps_endpoint",
     "beta_devices_endpoint",
     "beta_performance_endpoint",
+    "gps_amount",
+    "gps_amount_total",
 )
 
 @dataclass(frozen=True, kw_only=True)
@@ -153,19 +155,19 @@ SENSORS: tuple[VerizonSensorDescription, ...] = (
         value_fn=ip_mode_value,
     ),
     VerizonSensorDescription(
-        key="gps_amount",
+        key="gps_locked_satellites",
         data_key="gpsAmount",
         source="gps",
-        translation_key="gps_amount",
+        translation_key="gps_locked_satellites",
         icon="mdi:satellite-uplink",
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=_as_int,
     ),
     VerizonSensorDescription(
-        key="gps_amount_total",
+        key="gps_total_satellites",
         data_key="gpsAmountTot",
         source="gps",
-        translation_key="gps_amount_total",
+        translation_key="gps_total_satellites",
         icon="mdi:satellite-variant",
         entity_category=EntityCategory.DIAGNOSTIC,
         state_class=SensorStateClass.MEASUREMENT,
@@ -306,6 +308,6 @@ class VerizonLteExtenderSensor(VerizonLteExtenderEntity, SensorEntity):
         )
         data_key = self.entity_description.data_key or self.entity_description.key
         value = data.get(data_key)
-        if value in {None, "", "-"}:
+        if value is None or value == "" or value == "-":
             return None
         return self.entity_description.value_fn(value)
