@@ -48,7 +48,13 @@ async def extender_server(
     reject_stale_login_cookie: bool = False,
 ) -> AsyncIterator[tuple[str, dict[str, int]]]:
     """Run a minimal extender API server."""
-    state = {"logins": 0, "status_requests": 0}
+    state = {
+        "devices_requests": 0,
+        "gps_requests": 0,
+        "logins": 0,
+        "performance_requests": 0,
+        "status_requests": 0,
+    }
 
     async def login(request: web.Request) -> web.Response:
         if (
@@ -102,10 +108,25 @@ async def extender_server(
             }
         )
 
+    async def extra_endpoint(request: web.Request) -> web.Response:
+        expected = f"xsrf-{state['logins']}"
+        assert request.headers["X-Requested-With"] == "XMLHttpRequest"
+        assert request.headers["X-XSRF-TOKEN"] == expected
+        endpoint = request.match_info["endpoint"]
+        state[f"{endpoint}_requests"] += 1
+        return web.json_response(
+            {
+                "result": 1,
+                "endpoint": endpoint,
+                "serial": "should-be-redacted-by-entities",
+            }
+        )
+
     app = web.Application()
     app.router.add_post("/webapi/login", login)
     app.router.add_get("/webapi/simStatus", sim_status)
     app.router.add_get("/webapi/info", info)
+    app.router.add_get("/webapi/{endpoint:gps|devices|performance}", extra_endpoint)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, "127.0.0.1", 0)
@@ -167,6 +188,25 @@ class ApiTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(status["gpsStatus"], "Location Acquired")
         self.assertEqual(state["logins"], 2)
         self.assertEqual(state["status_requests"], 2)
+
+    async def test_extra_endpoints_use_authenticated_session(self) -> None:
+        """Beta endpoints use the authenticated API request path."""
+        async with extender_server() as (host, state):
+            api = VerizonLteExtenderApi(host, "secret", verify_ssl=False)
+            try:
+                gps = await api.async_get_gps()
+                devices = await api.async_get_devices()
+                performance = await api.async_get_performance()
+            finally:
+                await api.async_close()
+
+        self.assertEqual(gps["endpoint"], "gps")
+        self.assertEqual(devices["endpoint"], "devices")
+        self.assertEqual(performance["endpoint"], "performance")
+        self.assertEqual(state["logins"], 1)
+        self.assertEqual(state["gps_requests"], 1)
+        self.assertEqual(state["devices_requests"], 1)
+        self.assertEqual(state["performance_requests"], 1)
 
     def test_url_and_value_cleanup(self) -> None:
         """URLs and UI-formatted values are normalized."""

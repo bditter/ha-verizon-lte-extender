@@ -14,6 +14,12 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+EXTRA_ENDPOINTS = {
+    "gps": "GPS",
+    "devices": "devices",
+    "performance": "performance",
+}
+
 
 class VerizonLteExtenderCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Coordinate status polling for one extender."""
@@ -33,6 +39,8 @@ class VerizonLteExtenderCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
         self.api = api
         self.info: dict[str, Any] = {}
+        self.extra_data: dict[str, dict[str, Any]] = {}
+        self.extra_errors: dict[str, str] = {}
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch current extender data."""
@@ -47,4 +55,19 @@ class VerizonLteExtenderCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             raise UpdateFailed(
                 str(status.get("message") or "The extender reported an error")
             )
+
+        await self._async_update_extra_endpoints()
         return status
+
+    async def _async_update_extra_endpoints(self) -> None:
+        """Fetch beta discovery endpoints without failing the main update."""
+        for key, label in EXTRA_ENDPOINTS.items():
+            try:
+                data = await getattr(self.api, f"async_get_{key}")()
+            except VerizonLteExtenderError as err:
+                self.extra_errors[key] = str(err)
+                _LOGGER.debug("Unable to fetch %s endpoint: %s", label, err)
+                continue
+
+            self.extra_data[key] = data
+            self.extra_errors.pop(key, None)

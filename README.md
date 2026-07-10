@@ -16,6 +16,8 @@ cookies copied from a browser.
 - Local polling through `/webapi/simStatus`
 - Product details from `/webapi/info`
 - Status, connectivity, GPS, user-count, network, and diagnostic entities
+- Disabled-by-default beta endpoint diagnostics for `/webapi/gps`,
+  `/webapi/devices`, and `/webapi/performance`
 - Sensitive identifiers disabled by default
 - No latitude or longitude entities
 
@@ -81,6 +83,11 @@ The integration provides:
 
 HNB name, CSG ID, serial number, and MAC address are diagnostic entities that
 are disabled by default. Latitude and longitude are not exposed.
+
+Beta endpoint diagnostics for `/webapi/gps`, `/webapi/devices`, and
+`/webapi/performance` are also disabled by default. When enabled, they expose
+redacted payload attributes so endpoint shapes can be verified before adding
+stable entities.
 
 ## Supported Device
 

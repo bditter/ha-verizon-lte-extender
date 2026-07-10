@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0-beta.1 - 2026-07-10
+
+- Add beta diagnostic support for `/webapi/gps`, `/webapi/devices`, and
+  `/webapi/performance`.
+- Expose the new beta endpoint payloads as disabled-by-default diagnostic
+  sensors with sensitive attributes redacted.
+
 ## 1.0.12 - 2026-07-04
 
 - Remove the duplicate 4G Signal sensor because the extender's `FourGsignal`

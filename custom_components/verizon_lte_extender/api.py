@@ -127,6 +127,18 @@ class VerizonLteExtenderApi:
         """Return full product and feature information."""
         return await self._async_authenticated_get("webapi/info")
 
+    async def async_get_gps(self) -> dict[str, Any]:
+        """Return the extended GPS endpoint payload."""
+        return await self._async_authenticated_get("webapi/gps")
+
+    async def async_get_devices(self) -> dict[str, Any]:
+        """Return the connected-devices endpoint payload."""
+        return await self._async_authenticated_get("webapi/devices")
+
+    async def async_get_performance(self) -> dict[str, Any]:
+        """Return the performance endpoint payload."""
+        return await self._async_authenticated_get("webapi/performance")
+
     async def async_validate(self) -> tuple[dict[str, Any], dict[str, Any]]:
         """Authenticate and fetch the data needed during config flow."""
         await self.async_authenticate(force=True)

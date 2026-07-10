@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
@@ -25,6 +25,25 @@ from .entity_values import (
 )
 
 REMOVED_SENSOR_KEYS = ("ipsecIp", "paTemp", "FourGsignal")
+
+SENSITIVE_ATTRIBUTE_KEY_MARKERS = (
+    "authtoken",
+    "csg",
+    "hnb",
+    "imei",
+    "imsi",
+    "latitude",
+    "lati",
+    "longitude",
+    "longi",
+    "mac",
+    "mdn",
+    "password",
+    "serial",
+    "token",
+    "xsrf",
+)
+SENSITIVE_ATTRIBUTE_KEYS = {"lat", "lon", "long"}
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -135,6 +154,33 @@ SENSORS: tuple[VerizonSensorDescription, ...] = (
     ),
 )
 
+BETA_ENDPOINT_SENSORS: tuple[VerizonSensorDescription, ...] = (
+    VerizonSensorDescription(
+        key="beta_gps_endpoint",
+        data_key="gps",
+        translation_key="beta_gps_endpoint",
+        icon="mdi:crosshairs-question",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+    ),
+    VerizonSensorDescription(
+        key="beta_devices_endpoint",
+        data_key="devices",
+        translation_key="beta_devices_endpoint",
+        icon="mdi:devices",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+    ),
+    VerizonSensorDescription(
+        key="beta_performance_endpoint",
+        data_key="performance",
+        translation_key="beta_performance_endpoint",
+        icon="mdi:speedometer",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+    ),
+)
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -152,8 +198,16 @@ async def async_setup_entry(
             registry.async_remove(entity_id)
 
     async_add_entities(
-        VerizonLteExtenderSensor(coordinator, entry, description)
-        for description in SENSORS
+        [
+            *(
+                VerizonLteExtenderSensor(coordinator, entry, description)
+                for description in SENSORS
+            ),
+            *(
+                VerizonLteExtenderBetaEndpointSensor(coordinator, entry, description)
+                for description in BETA_ENDPOINT_SENSORS
+            ),
+        ]
     )
 
 
@@ -180,3 +234,67 @@ class VerizonLteExtenderSensor(VerizonLteExtenderEntity, SensorEntity):
         if value in {None, "", "-"}:
             return None
         return self.entity_description.value_fn(value)
+
+
+class VerizonLteExtenderBetaEndpointSensor(VerizonLteExtenderEntity, SensorEntity):
+    """Diagnostic beta sensor exposing redacted endpoint payloads."""
+
+    entity_description: VerizonSensorDescription
+
+    def __init__(
+        self,
+        coordinator: VerizonLteExtenderCoordinator,
+        entry: ConfigEntry,
+        description: VerizonSensorDescription,
+    ) -> None:
+        """Initialize a beta endpoint sensor."""
+        super().__init__(coordinator, entry, description.key)
+        self.entity_description = description
+
+    @property
+    def native_value(self) -> str | None:
+        """Return whether the beta endpoint has data."""
+        key = self.entity_description.data_key or self.entity_description.key
+        if key in self.coordinator.extra_data:
+            data = self.coordinator.extra_data[key]
+            if data.get("result") == 0 and data.get("message"):
+                return str(clean_value(data["message"]))[:255]
+            return "OK"
+        return None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the redacted raw payload for beta endpoint discovery."""
+        key = self.entity_description.data_key or self.entity_description.key
+        attributes: dict[str, Any] = {"endpoint": f"/webapi/{key}"}
+        if key in self.coordinator.extra_data:
+            attributes["payload"] = _redact_sensitive_attributes(
+                self.coordinator.extra_data[key]
+            )
+        if error := self.coordinator.extra_errors.get(key):
+            attributes["last_error"] = error
+        return attributes
+
+
+def _redact_sensitive_attributes(value: Any) -> Any:
+    """Redact sensitive endpoint attributes before exposing beta payloads."""
+    if isinstance(value, Mapping):
+        return {
+            key: (
+                "REDACTED"
+                if _is_sensitive_attribute_key(str(key))
+                else _redact_sensitive_attributes(clean_value(item))
+            )
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_redact_sensitive_attributes(item) for item in value]
+    return clean_value(value)
+
+
+def _is_sensitive_attribute_key(key: str) -> bool:
+    """Return whether an attribute key may contain private data."""
+    compact_key = "".join(character for character in key.lower() if character.isalnum())
+    return compact_key in SENSITIVE_ATTRIBUTE_KEYS or any(
+        marker in compact_key for marker in SENSITIVE_ATTRIBUTE_KEY_MARKERS
+    )
