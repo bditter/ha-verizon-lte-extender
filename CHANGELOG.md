@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0-beta.2 - 2026-07-10
+
+- Add beta sensors from verified `/webapi/gps`, `/webapi/devices`, and
+  `/webapi/performance` payloads.
+- Add GPS amount, peak connected users, peak capacity used, and
+  current uplink/downlink bandwidth entities.
+- Remove the generic raw beta endpoint diagnostic entities from the next beta
+  so only observed field-backed sensors are added.
+
 ## 1.1.0-beta.1 - 2026-07-10
 
 - Add beta diagnostic support for `/webapi/gps`, `/webapi/devices`, and

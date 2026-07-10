@@ -6,9 +6,13 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
+from homeassistant.components.sensor import (
+    SensorEntity,
+    SensorEntityDescription,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory
+from homeassistant.const import PERCENTAGE, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -24,34 +28,58 @@ from .entity_values import (
     ip_mode_value,
 )
 
-REMOVED_SENSOR_KEYS = ("ipsecIp", "paTemp", "FourGsignal")
-
-SENSITIVE_ATTRIBUTE_KEY_MARKERS = (
-    "authtoken",
-    "csg",
-    "hnb",
-    "imei",
-    "imsi",
-    "latitude",
-    "lati",
-    "longitude",
-    "longi",
-    "mac",
-    "mdn",
-    "password",
-    "serial",
-    "token",
-    "xsrf",
+REMOVED_SENSOR_KEYS = (
+    "ipsecIp",
+    "paTemp",
+    "FourGsignal",
+    "beta_gps_endpoint",
+    "beta_devices_endpoint",
+    "beta_performance_endpoint",
 )
-SENSITIVE_ATTRIBUTE_KEYS = {"lat", "lon", "long"}
-
 
 @dataclass(frozen=True, kw_only=True)
 class VerizonSensorDescription(SensorEntityDescription):
     """Describe a Verizon LTE Extender sensor."""
 
     data_key: str | None = None
+    source: str | None = None
     value_fn: Callable[[Any], Any] = clean_value
+
+
+def _as_int(value: Any) -> int | None:
+    """Return a numeric integer sensor value."""
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _as_float(value: Any) -> float | None:
+    """Return a numeric float sensor value."""
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _current_downlink_bandwidth(value: Any) -> float | None:
+    """Return the latest downlink bandwidth sample."""
+    return _latest_bandwidth_value(value, "Downlink")
+
+
+def _current_uplink_bandwidth(value: Any) -> float | None:
+    """Return the latest uplink bandwidth sample."""
+    return _latest_bandwidth_value(value, "Uplink")
+
+
+def _latest_bandwidth_value(value: Any, key: str) -> float | None:
+    """Return a numeric value from the latest bandwidth sample."""
+    if not isinstance(value, list) or not value:
+        return None
+    latest = value[-1]
+    if not isinstance(latest, Mapping):
+        return None
+    return _as_float(latest.get(key))
 
 
 SENSORS: tuple[VerizonSensorDescription, ...] = (
@@ -125,6 +153,83 @@ SENSORS: tuple[VerizonSensorDescription, ...] = (
         value_fn=ip_mode_value,
     ),
     VerizonSensorDescription(
+        key="gps_amount",
+        data_key="gpsAmount",
+        source="gps",
+        translation_key="gps_amount",
+        icon="mdi:satellite-uplink",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_as_int,
+    ),
+    VerizonSensorDescription(
+        key="gps_amount_total",
+        data_key="gpsAmountTot",
+        source="gps",
+        translation_key="gps_amount_total",
+        icon="mdi:satellite-variant",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_as_int,
+    ),
+    VerizonSensorDescription(
+        key="peak_connected_users_last_hour",
+        data_key="peakConnectedUsersLastHour",
+        source="devices",
+        translation_key="peak_connected_users_last_hour",
+        icon="mdi:account-clock",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_as_int,
+    ),
+    VerizonSensorDescription(
+        key="peak_connected_users_last_24_hours",
+        data_key="peakConnectedUsersLast24Hours",
+        source="devices",
+        translation_key="peak_connected_users_last_24_hours",
+        icon="mdi:account-clock-outline",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_as_int,
+    ),
+    VerizonSensorDescription(
+        key="peak_capacity_used_last_hour",
+        data_key="peakCapacityUsedLastHour",
+        source="devices",
+        translation_key="peak_capacity_used_last_hour",
+        icon="mdi:gauge",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_as_float,
+    ),
+    VerizonSensorDescription(
+        key="peak_capacity_used_last_24_hours",
+        data_key="peakCapacityUsedLast24Hours",
+        source="devices",
+        translation_key="peak_capacity_used_last_24_hours",
+        icon="mdi:gauge-full",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_as_float,
+    ),
+    VerizonSensorDescription(
+        key="current_downlink_bandwidth",
+        data_key="CurrentBandWidth",
+        source="performance",
+        translation_key="current_downlink_bandwidth",
+        icon="mdi:download-network",
+        native_unit_of_measurement="Mbit/s",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_current_downlink_bandwidth,
+    ),
+    VerizonSensorDescription(
+        key="current_uplink_bandwidth",
+        data_key="CurrentBandWidth",
+        source="performance",
+        translation_key="current_uplink_bandwidth",
+        icon="mdi:upload-network",
+        native_unit_of_measurement="Mbit/s",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_current_uplink_bandwidth,
+    ),
+    VerizonSensorDescription(
         key="hnbName",
         translation_key="hnb_name",
         icon="mdi:identifier",
@@ -154,33 +259,6 @@ SENSORS: tuple[VerizonSensorDescription, ...] = (
     ),
 )
 
-BETA_ENDPOINT_SENSORS: tuple[VerizonSensorDescription, ...] = (
-    VerizonSensorDescription(
-        key="beta_gps_endpoint",
-        data_key="gps",
-        translation_key="beta_gps_endpoint",
-        icon="mdi:crosshairs-question",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=False,
-    ),
-    VerizonSensorDescription(
-        key="beta_devices_endpoint",
-        data_key="devices",
-        translation_key="beta_devices_endpoint",
-        icon="mdi:devices",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=False,
-    ),
-    VerizonSensorDescription(
-        key="beta_performance_endpoint",
-        data_key="performance",
-        translation_key="beta_performance_endpoint",
-        icon="mdi:speedometer",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=False,
-    ),
-)
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -198,16 +276,8 @@ async def async_setup_entry(
             registry.async_remove(entity_id)
 
     async_add_entities(
-        [
-            *(
-                VerizonLteExtenderSensor(coordinator, entry, description)
-                for description in SENSORS
-            ),
-            *(
-                VerizonLteExtenderBetaEndpointSensor(coordinator, entry, description)
-                for description in BETA_ENDPOINT_SENSORS
-            ),
-        ]
+        VerizonLteExtenderSensor(coordinator, entry, description)
+        for description in SENSORS
     )
 
 
@@ -229,72 +299,13 @@ class VerizonLteExtenderSensor(VerizonLteExtenderEntity, SensorEntity):
     @property
     def native_value(self) -> Any:
         """Return the current value."""
+        data = (
+            self.coordinator.data
+            if self.entity_description.source is None
+            else self.coordinator.extra_data.get(self.entity_description.source, {})
+        )
         data_key = self.entity_description.data_key or self.entity_description.key
-        value = self.coordinator.data.get(data_key)
+        value = data.get(data_key)
         if value in {None, "", "-"}:
             return None
         return self.entity_description.value_fn(value)
-
-
-class VerizonLteExtenderBetaEndpointSensor(VerizonLteExtenderEntity, SensorEntity):
-    """Diagnostic beta sensor exposing redacted endpoint payloads."""
-
-    entity_description: VerizonSensorDescription
-
-    def __init__(
-        self,
-        coordinator: VerizonLteExtenderCoordinator,
-        entry: ConfigEntry,
-        description: VerizonSensorDescription,
-    ) -> None:
-        """Initialize a beta endpoint sensor."""
-        super().__init__(coordinator, entry, description.key)
-        self.entity_description = description
-
-    @property
-    def native_value(self) -> str | None:
-        """Return whether the beta endpoint has data."""
-        key = self.entity_description.data_key or self.entity_description.key
-        if key in self.coordinator.extra_data:
-            data = self.coordinator.extra_data[key]
-            if data.get("result") == 0 and data.get("message"):
-                return str(clean_value(data["message"]))[:255]
-            return "OK"
-        return None
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return the redacted raw payload for beta endpoint discovery."""
-        key = self.entity_description.data_key or self.entity_description.key
-        attributes: dict[str, Any] = {"endpoint": f"/webapi/{key}"}
-        if key in self.coordinator.extra_data:
-            attributes["payload"] = _redact_sensitive_attributes(
-                self.coordinator.extra_data[key]
-            )
-        if error := self.coordinator.extra_errors.get(key):
-            attributes["last_error"] = error
-        return attributes
-
-
-def _redact_sensitive_attributes(value: Any) -> Any:
-    """Redact sensitive endpoint attributes before exposing beta payloads."""
-    if isinstance(value, Mapping):
-        return {
-            key: (
-                "REDACTED"
-                if _is_sensitive_attribute_key(str(key))
-                else _redact_sensitive_attributes(clean_value(item))
-            )
-            for key, item in value.items()
-        }
-    if isinstance(value, list):
-        return [_redact_sensitive_attributes(item) for item in value]
-    return clean_value(value)
-
-
-def _is_sensitive_attribute_key(key: str) -> bool:
-    """Return whether an attribute key may contain private data."""
-    compact_key = "".join(character for character in key.lower() if character.isalnum())
-    return compact_key in SENSITIVE_ATTRIBUTE_KEYS or any(
-        marker in compact_key for marker in SENSITIVE_ATTRIBUTE_KEY_MARKERS
-    )
